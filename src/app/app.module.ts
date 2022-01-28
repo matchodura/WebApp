@@ -18,6 +18,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';
 import { NgChartsModule } from 'ng2-charts';
 
+import '@angular/common/locales/global/pl';
 
 @NgModule({
   declarations: [

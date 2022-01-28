@@ -5,6 +5,7 @@ import { DHT } from '../interfaces/DHT';
 import {ViewChild } from '@angular/core';
 import { ChartConfiguration, ChartEvent, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+import {formatDate} from '@angular/common';
 
 interface Room {
   value: string;
@@ -33,18 +34,48 @@ export class HomeComponent implements OnInit {
   ];
 
   data: DHT[] = [];
-
+  temperature: number[] = [];
 
   constructor(private dataService: DataService) { }
 
   ngOnInit(): void {
-
+    this.sensor = 'strych/dht';
+    this.getData();
   }
 
   changeValue(value:any){
-    console.log(value.value)
+   
     this.sensor = value.value;
+    this.getData();
+    this.lineChartData.labels = this.data.map(a => formatDate(new Date(a.time), 'medium', 'pl-PL'));
+    this.lineChartData.datasets[0].data = this.data.map(a => a.temperature);
+    this.lineChartData.datasets[1].data = this.data.map(a => a.humidity);
+
+    this.chart?.update();
+
   }
+
+  filterByTime(value:any){
+    this.getData();
+    var currentTime = new Date();
+    var numberOfMlSeconds = currentTime.getTime();
+    var addMlSeconds = (value * 60) * 60 * 1000;
+    var newDateObj = new Date(numberOfMlSeconds - addMlSeconds);
+
+    var isoDateString = newDateObj.toISOString();
+
+    
+    console.log(this.data);
+    var test = this.data.filter(
+      a => a.time > isoDateString);
+
+    this.lineChartData.labels = test.map(a => formatDate(new Date(a.time), 'medium', 'pl-PL'));
+    this.lineChartData.datasets[0].data = test.map(a => a.temperature);
+    this.lineChartData.datasets[1].data = test.map(a => a.humidity);
+    this.chart?.update();
+  }
+
+
 
   public getData() {
     this.loading = true;
@@ -55,7 +86,7 @@ export class HomeComponent implements OnInit {
           console.log('response received')
           this.response = response; 
           this.data = response;
-          console.log(this.response);
+         
         },
         (error) => {                              //error() callback
           console.error('Request failed with error')
@@ -63,7 +94,7 @@ export class HomeComponent implements OnInit {
           this.loading = false;
         },
         () => {                                   //complete() callback
-          console.error('Request completed')      //This is actually not needed 
+          console.log('Request completed')      //This is actually not needed 
           this.loading = false; 
         })
   }
@@ -71,19 +102,19 @@ export class HomeComponent implements OnInit {
   public lineChartData: ChartConfiguration['data'] = {
     datasets: [
       {
-        data: [ 65, 59, 80, 81, 56, 55, 40 ],
-        label: 'Series A',
+        data: [],
+        label: 'Temperatura',
         backgroundColor: 'rgba(148,159,177,0.2)',
         borderColor: 'rgba(148,159,177,1)',
         pointBackgroundColor: 'rgba(148,159,177,1)',
         pointBorderColor: '#fff',
         pointHoverBackgroundColor: '#fff',
         pointHoverBorderColor: 'rgba(148,159,177,0.8)',
-        fill: 'origin',
+        fill: 'origin'
       },
       {
-        data: [ 28, 48, 40, 19, 86, 27, 90 ],
-        label: 'Series B',
+        data: [],
+        label: 'Wilgotnosc',
         backgroundColor: 'rgba(77,83,96,0.2)',
         borderColor: 'rgba(77,83,96,1)',
         pointBackgroundColor: 'rgba(77,83,96,1)',
@@ -92,20 +123,20 @@ export class HomeComponent implements OnInit {
         pointHoverBorderColor: 'rgba(77,83,96,1)',
         fill: 'origin',
       },
-      {
-        data: [ 180, 480, 770, 90, 1000, 270, 400 ],
-        label: 'Series C',
-        yAxisID: 'y-axis-1',
-        backgroundColor: 'rgba(255,0,0,0.3)',
-        borderColor: 'red',
-        pointBackgroundColor: 'rgba(148,159,177,1)',
-        pointBorderColor: '#fff',
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgba(148,159,177,0.8)',
-        fill: 'origin',
-      }
+      // {
+      //   data: [ 180, 480, 770, 90, 1000, 270, 400 ],
+      //   label: 'Series C',
+      //   yAxisID: 'y-axis-1',
+      //   backgroundColor: 'rgba(255,0,0,0.3)',
+      //   borderColor: 'red',
+      //   pointBackgroundColor: 'rgba(148,159,177,1)',
+      //   pointBorderColor: '#fff',
+      //   pointHoverBackgroundColor: '#fff',
+      //   pointHoverBorderColor: 'rgba(148,159,177,0.8)',
+      //   fill: 'origin',
+      // }
     ],
-    labels: [ 'January', 'February', 'March', 'April', 'May', 'June', 'July' ]
+    labels: []
   };
 
   public lineChartOptions: ChartConfiguration['options'] = {
@@ -121,15 +152,16 @@ export class HomeComponent implements OnInit {
         {
           position: 'left',
         },
-      'y-axis-1': {
-        position: 'right',
-        grid: {
-          color: 'rgba(255,0,0,0.3)',
-        },
-        ticks: {
-          color: 'red'
-        }
-      }
+      //   },
+      // 'y-axis-1': {
+      //   position: 'right',
+      //   grid: {
+      //     color: 'rgba(255,0,0,0.3)',
+      //   },
+      //   ticks: {
+      //     color: 'red'
+      //   }
+      // }
     },
 
     // plugins: {

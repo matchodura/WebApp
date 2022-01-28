@@ -3,6 +3,6 @@ export interface DHT {
     sensorName: string;
     temperature: number;
     humidity: number;
-    dewPoint: number;
+    dewpoint: number;
     time: string;
 }
